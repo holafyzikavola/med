@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cesta do nitra mědi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+body{margin:0;background:#0b0b0a;font-family:system-ui,"Segoe UI",sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.wrap{width:min(96vw,calc((100vh - 90px)*16/9))}
+.st{position:relative;width:100%;aspect-ratio:16/9;background:#141413;border-radius:12px;overflow:hidden}
+.sc{position:absolute;inset:0;opacity:0;transform:scale(.2);transition:transform 1.4s cubic-bezier(.65,0,.3,1),opacity 1.4s}
+.sc.on{opacity:1;transform:scale(1)}
+.sc svg,.bg svg{width:100%;height:100%;display:block}
+.ov{position:absolute;left:0;right:0;pointer-events:none;transition:opacity .6s}
+.orb{transform-box:view-box}
+button{background:transparent;color:#F1EFE8;border:1px solid #5F5E5A;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px}
+button:hover{background:#2C2C2A}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:no-preference){.orb{animation:spin linear infinite}.vib{animation:vib 1.1s ease-in-out infinite alternate}.glu{animation:dash .7s linear infinite}.tw{animation:tw 3s ease-in-out infinite}.sweep{animation:sweep 5s ease-in-out infinite}.drift{animation:drift 3s linear infinite}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes vib{from{transform:translate(-1.5px,1px)}to{transform:translate(1.5px,-1px)}}
+@keyframes dash{to{stroke-dashoffset:-18}}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:.9}}
+@keyframes sweep{0%{transform:translateX(-300px)}60%,100%{transform:translateX(560px)}}
+@keyframes drift{0%{transform:translateX(40px);opacity:0}15%,85%{opacity:1}100%{transform:translateX(-40px);opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 class="sr-only">Cesta do nitra měděného kabelu</h1>
+<div class="st" id="st">
+<div class="bg" id="bg" style="position:absolute;inset:0"></div>
+<div class="ov" style="top:0;padding:1.6% 2.2%">
+<div id="num" style="font-size:clamp(12px,1.2vw,18px);letter-spacing:2px;color:#F0997B"></div>
+<div id="ttl" style="font-size:clamp(20px,2.4vw,40px);font-weight:500;color:#F1EFE8;margin-top:2px"></div>
+<div id="mag" style="font-size:clamp(12px,1.3vw,20px);color:#B4B2A9;margin-top:2px"></div>
+</div>
+<div class="ov" style="bottom:0;padding:1.2% 2.2%;background:rgba(0,0,0,.65)">
+<div id="cap" style="font-size:clamp(13px,1.6vw,26px);color:#F1EFE8;line-height:1.5;text-align:center"></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+<button id="prev" aria-label="Oddálit"><i class="ti ti-player-track-prev"></i></button>
+<button id="play" style="min-width:110px"></button>
+<button id="next" aria-label="Přiblížit"><i class="ti ti-player-track-next"></i></button>
+<button id="fs" aria-label="Celá obrazovka"><i class="ti ti-maximize"></i></button>
+<div id="bar" style="flex:1;display:flex;gap:4px"></div>
+</div>
+</div>
+<script>
+const LT='#F1EFE8',MD='#B4B2A9',AC='#F0997B',CU=['#E0A270','#B87333','#F5C9A0','#9A5B2A','#D08A55','#B87333','#7A4A22'];
+const T=(x,y,s,o='',sz=14,c=LT)=>`<text x="${x}" y="${y}" style="font-size:${sz}px;fill:${c};font-family:system-ui,sans-serif" ${o}>${s}</text>`;
+let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+const W=c=>`<svg viewBox="0 0 680 383" preserveAspectRatio="xMidYMid meet">${c}</svg>`;
+const D=(m=2)=>`style="animation-delay:-${(rnd()*m).toFixed(2)}s"`;
+const card=(t,rows)=>`<rect x="448" y="92" width="212" height="${44+rows.length*20}" rx="10" fill="#1F1E1C" stroke="#444441"/>`+T(464,117,t,'',14,AC)+rows.map((r,i)=>T(464,142+i*20,r,'',12,'#D3D1C7')).join('');
+const strand=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#B87333" stroke="#4A2C12" stroke-width="1"/><circle cx="${x-r*.3}" cy="${y-r*.3}" r="${r*.45}" fill="#E0A270"/><circle cx="${x-r*.4}" cy="${y-r*.4}" r="${r*.15}" fill="#FAEEDA"/>`;
+seed=99;let st='';for(let i=0;i<60;i++)st+=`<circle class="tw" cx="${rnd()*680}" cy="${rnd()*383}" r="${(rnd()*1.2+.3).toFixed(1)}" fill="#D3D1C7" style="animation-delay:-${(rnd()*3).toFixed(1)}s"/>`;
+document.getElementById('bg').innerHTML=W(st);
+function s1(){const cores=[['M284 182 C320 175 340 150 420 145',145,'#6B3E1F',''],['M286 205 L420 205',205,'#378ADD',''],['M284 228 C320 235 340 262 420 266',266,'#EF9F27','#639922']];
+let c=`<linearGradient id="sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAF9F5"/><stop offset="1" stop-color="#9C9A92"/></linearGradient>
+<clipPath id="shc"><rect x="20" y="160" width="262" height="90" rx="4"/></clipPath>
+<rect x="20" y="160" width="262" height="90" rx="4" fill="url(#sh)"/>
+<g clip-path="url(#shc)"><rect class="sweep" x="0" y="160" width="40" height="90" fill="#FFFFFF" opacity=".35"/></g>
+<line x1="24" y1="171" x2="278" y2="171" stroke="#FFFFFF" stroke-width="4" opacity=".6" stroke-linecap="round"/>
+<ellipse cx="282" cy="205" rx="14" ry="45" fill="#D3D1C7" stroke="#B4B2A9"/>`;
+cores.forEach(([d,y,col,str])=>{c+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="22"/>`;
+if(str)c+=`<path d="${d}" fill="none" stroke="${str}" stroke-width="22" stroke-dasharray="9 9"/>`;
+c+=`<path d="${d}" transform="translate(0,-6)" fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".35"/><ellipse cx="420" cy="${y}" rx="4" ry="11" fill="#2C2C2A"/>`;
+[-7.5,-5,-2.5,0,2.5,5,7.5].forEach((o,i)=>{c+=`<line x1="420" y1="${y+o}" x2="${505+Math.abs(o)*.6}" y2="${y+o*1.5}" stroke="${CU[i]}" stroke-width="3" stroke-linecap="round"/>`})});
+c+=`<rect class="tw" x="494" y="189" width="32" height="32" fill="none" stroke="${AC}" stroke-width="2" stroke-dasharray="4 3"/>`;
+return W(c+T(40,282,'Vnější plášť (PVC)','',12,MD)+T(316,118,'Izolace vodičů','',12,MD)+T(536,182,'Měděné drátky','',12,MD))}
+function s2(){const cx=220,cy=205;let c=`<circle cx="${cx}" cy="${cy}" r="112" fill="#185FA5"/><path d="M${cx-82} ${cy-70} A108 108 0 0 1 ${cx+25} ${cy-105}" fill="none" stroke="#B5D4F4" stroke-width="4" opacity=".45" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="90" fill="#0C447C"/><circle cx="${cx}" cy="${cy}" r="86" fill="#2C1A0A"/>`;
+for(let j=-4;j<=4;j++)for(let i=-5;i<=5;i++){const x=cx+(i+(j%2?.5:0))*24,y=cy+j*20.8;if(Math.hypot(x-cx,y-cy)<=74)c+=strand(x,y,11.5)}
+c+=`<circle class="tw" cx="${cx}" cy="${cy}" r="17" fill="none" stroke="${AC}" stroke-width="2"/>`;
+return W(c+card('Měděné lanko',['Desítky tenkých drátků','Čistota mědi ≈ 99,9 %','Měď vede proud 2. nejlépe','ze všech kovů (po stříbře)']))}
+function s3(){seed=21;const nx=5,ny=4,x0=30,y0=80,dx=390/nx,dy=240/ny,p=[];
+for(let j=0;j<=ny;j++){p.push([]);for(let i=0;i<=nx;i++){let x=x0+i*dx,y=y0+j*dy;if(i>0&&i<nx)x+=(rnd()-.5)*dx*.6;if(j>0&&j<ny)y+=(rnd()-.5)*dy*.6;p[j].push([x,y])}}
+const sh=['#C27A45','#B06A38','#D08A55','#A35F30','#BC7440','#C88550'];let c='';
+for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const q=[p[j][i],p[j][i+1],p[j+1][i+1],p[j+1][i]],pts=q.map(v=>v.join(',')).join(' '),a=rnd()*3.14,cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2;
+let l='';if(rnd()>.4){const o=(rnd()-.5)*20;l=`<line x1="${cx-80*Math.cos(a)+o*Math.sin(a)}" y1="${cy-80*Math.sin(a)-o*Math.cos(a)}" x2="${cx+80*Math.cos(a)+o*Math.sin(a)}" y2="${cy+80*Math.sin(a)-o*Math.cos(a)}" stroke="${sh[Math.floor(rnd()*6)]}" stroke-width="${8+rnd()*8}"/>`}
+c+=`<clipPath id="k${j}${i}"><polygon points="${pts}"/></clipPath><polygon points="${pts}" fill="${sh[Math.floor(rnd()*6)]}"/><g clip-path="url(#k${j}${i})">${l}</g><polygon points="${pts}" fill="none" stroke="#3A220E" stroke-width="2.5"/>`}
+c+=`<rect class="tw" x="214" y="185" width="32" height="28" fill="none" stroke="#FAEEDA" stroke-width="2" stroke-dasharray="4 3"/>`;
+return W(c+card('Zrna mědi',['Velikost ≈ 10–100 µm','Každé zrno = jeden krystal','Pruhy = tzv. dvojčata','Hranice zrn brzdí proud']))}
+function s4(){seed=5;const s=32,x0=40,y0=85;let c=`<rect x="${x0+4*s}" y="${y0+2*s}" width="${2*s}" height="${2*s}" fill="#3A220E" stroke="${AC}" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+for(let j=0;j<=7;j++)for(let i=0;i<=12;i++){const f=(i+j)%2===0;c+=`<circle class="vib" ${D()} cx="${x0+i*s}" cy="${y0+j*s}" r="${f?13:11}" fill="${f?'#E0A270':'#9A5B2A'}" stroke="${f?'#F5C9A0':'#B87333'}" stroke-width=".8"/>`}
+for(let k=0;k<26;k++){const i=Math.floor(rnd()*12),j=Math.floor(rnd()*7);c+=`<g class="drift" style="animation-delay:-${(rnd()*3).toFixed(2)}s;animation-duration:${(2.4+rnd()*1.4).toFixed(2)}s"><circle cx="${x0+(i+.5)*s}" cy="${y0+(j+.5)*s}" r="6" fill="#378ADD" opacity=".35"/><circle cx="${x0+(i+.5)*s}" cy="${y0+(j+.5)*s}" r="3" fill="#B5D4F4"/></g>`}
+c+=`<circle class="tw" cx="${x0+6*s}" cy="${y0+4*s}" r="20" fill="none" stroke="${AC}" stroke-width="2"/>`;
+return W(c+card('Mřížka mědi',['Plošně centrovaná krychle','Hrana buňky 0,361 nm','Modré tečky = volné e⁻','Jejich tok = el. proud']))}
+function s5(){const cx=220,cy=205,R=[26,52,80,112],N=[2,8,18,1],sp=[4,7,11,16];let c='';
+R.forEach((r,k)=>{c+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${k===3?'#EF9F27':'#378ADD'}" stroke-width="1" opacity=".45"/><g class="orb" style="transform-origin:${cx}px ${cy}px;animation-duration:${sp[k]}s${k%2?';animation-direction:reverse':''}">`;
+for(let e=0;e<N[k];e++){const t=e/N[k]*6.283+k*.4-1,x=cx+r*Math.cos(t),y=cy+r*Math.sin(t),v=k===3;c+=`<circle cx="${x}" cy="${y}" r="${v?12:8}" fill="${v?'#EF9F27':'#378ADD'}" opacity=".3"/><circle cx="${x}" cy="${y}" r="${v?5.5:4}" fill="${v?'#FAC775':'#B5D4F4'}"/>`}c+='</g>'});
+c+=`<circle cx="${cx}" cy="${cy}" r="13" fill="#E24B4A" opacity=".3"/><circle cx="${cx}" cy="${cy}" r="7.5" fill="#F09595"/><circle class="tw" cx="${cx}" cy="${cy}" r="18" fill="none" stroke="${AC}" stroke-width="1.5"/>`;
+return W(c+card('Atom mědi · Cu',['Protonové číslo 29','Elektrony 2 · 8 · 18 · 1','Průměr ≈ 0,26 nm','Žlutý e⁻ je vázán slabě','a snadno se uvolní']))}
+let HL='50% 50%';
+function s6(){const cx=220,cy=205;let c='',ar=[...Array(63).keys()];seed=3;
+for(let i=62;i>0;i--){const j=Math.floor(rnd()*(i+1));[ar[i],ar[j]]=[ar[j],ar[i]]}
+const pr=new Set(ar.slice(0,29));let hl=null;
+for(let i=62;i>=0;i--){const t=i*2.39996,r=13.5*Math.sqrt(i+.5),x=cx+r*Math.cos(t),y=cy+r*Math.sin(t),p=pr.has(i);if(p)hl=[x,y];
+c+=`<circle class="vib" ${D()} cx="${x}" cy="${y}" r="12" fill="${p?'#E24B4A':'#B4B2A9'}" stroke="${p?'#F7C1C1':'#F1EFE8'}" stroke-width=".8"/>`}
+HL=(hl[0]/6.8).toFixed(1)+'% '+(hl[1]/3.83).toFixed(1)+'%';
+c+=`<circle class="tw" cx="${hl[0]}" cy="${hl[1]}" r="18" fill="none" stroke="${AC}" stroke-width="2"/>`;
+return W(c+card('Jádro mědi-63',['29 protonů (červené)','34 neutronů (šedé)','69 % přírodní mědi','Zbytek je měď-65','Průměr ≈ 10 fm']))}
+function s7(){const nuc=(cx,lab,ch,qs,f,s)=>{const P=[[cx,140],[cx-48,228],[cx+48,228]];let o=`<circle cx="${cx}" cy="200" r="100" fill="${f}" stroke="${s}" stroke-width="1.5"/>`;
+[[0,1],[1,2],[2,0]].forEach(([a,b])=>{const [x1,y1]=P[a],[x2,y2]=P[b],mx=(x1+x2)/2,my=(y1+y2)/2,nx=-(y2-y1)/7,ny=(x2-x1)/7;
+o+=`<path class="glu" d="M${x1} ${y1} Q${(x1+mx)/2+nx} ${(y1+my)/2+ny} ${mx} ${my} T${x2} ${y2}" fill="none" stroke="#97C459" stroke-width="2.5" stroke-dasharray="5 4"/>`});
+qs.forEach((l,i)=>{const u=l==='u';o+=`<g class="vib" ${D()}><circle cx="${P[i][0]}" cy="${P[i][1]}" r="28" fill="${u?'#EF9F27':'#378ADD'}" opacity=".25"/><circle cx="${P[i][0]}" cy="${P[i][1]}" r="20" fill="${u?'#FAC775':'#85B7EB'}"/><text x="${P[i][0]}" y="${P[i][1]}" text-anchor="middle" dominant-baseline="central" style="font-size:16px;font-weight:500;fill:#2C2C2A;font-family:system-ui,sans-serif">${l}</text></g>`});
+return o+T(cx,195,ch,'text-anchor="middle"',12,MD)+T(cx,282,lab,'text-anchor="middle"',14,LT)};seed=8;
+return W(nuc(190,'Proton · uud','náboj +1',['u','u','d'],'#4A1B0C','#E24B4A')+nuc(490,'Neutron · udd','náboj 0',['u','d','d'],'#2C2C2A','#888780')+T(340,110,'u = +⅔   d = −⅓','text-anchor="middle"',12,MD))}
+function s8(){return W(`<g class="orb" style="transform-origin:340px 175px;animation-duration:20s"><circle cx="340" cy="175" r="90" fill="none" stroke="#378ADD" stroke-width="1" stroke-dasharray="2 8" opacity=".5"/></g>
+<g class="orb" style="transform-origin:340px 175px;animation-duration:12s;animation-direction:reverse"><circle cx="340" cy="175" r="55" fill="none" stroke="#378ADD" stroke-width="1" stroke-dasharray="2 6" opacity=".6"/></g>
+<circle class="tw" cx="340" cy="175" r="24" fill="#378ADD" opacity=".2"/><circle cx="340" cy="175" r="13" fill="#378ADD" opacity=".35"/><circle cx="340" cy="175" r="6" fill="#E6F1FB"/>
+${T(340,292,'Náboj −1 · hmotnost ≈ 1/1836 protonu','text-anchor="middle"',12,MD)}`)}
+const L=[
+['Elektrický kabel','Měřítko ≈ 1 cm · zvětšení 1×',s1,'Obyčejný kabel. Pod plastovou izolací jsou měděné vodiče – právě jimi teče proud.','75% 53.5%'],
+['Konec měděného lanka','Měřítko ≈ 2 mm · zvětšení 5×',s2,'Průřez vodičem: svazek tenkých měděných drátků uvnitř izolace.','32.4% 53.5%'],
+['Krystalová zrna','Měřítko ≈ 0,1 mm · zvětšení 100×',s3,'Pod mikroskopem se ukáže, že měď je složená z drobných krystalů – zrn. Každé má mřížku natočenou jinak.','33.8% 52.2%'],
+['Krystalová mřížka','Měřítko ≈ 1 nm · zvětšení 10 000 000×',s4,'Atomy mědi stojí v pravidelné mřížce. Každý pustí jeden elektron do společného „moře" – a když zapojíme napětí, tyto elektrony se dají do pohybu.','35.3% 55.6%'],
+['Atom mědi','Měřítko ≈ 0,26 nm · zvětšení 40 000 000×',s5,'Jádro a 29 elektronů ve čtyřech slupkách. Jediný vnější elektron je slabě vázaný – proto měď tak dobře vede proud.','32.4% 53.5%'],
+['Atomové jádro','Měřítko ≈ 10 fm · zvětšení 1 000 000 000 000×',s6,'Jádro je asi 26 000× menší než atom, ale nese přes 99,9 % jeho hmotnosti. Drží ho silná jaderná síla.',null],
+['Proton a neutron','Měřítko ≈ 1,7 fm',s7,'Proton i neutron se skládají ze tří kvarků, které k sobě poutají gluony.','50% 50%'],
+['Elektron','Elementární částice',s8,'Elektron je podle dnešních znalostí základní částice – uvnitř už nic menšího nemá. Tady cesta končí.','50% 50%']];
+const stg=document.getElementById('st'),scs=[],bar=document.getElementById('bar');
+L.forEach((l,i)=>{const d=document.createElement('div');d.className='sc';d.innerHTML=l[2]();if(!l[4])l[4]=HL;stg.insertBefore(d,stg.children[1]);scs.push(d);
+const b=document.createElement('button');b.setAttribute('aria-label','Scéna '+(i+1));b.style.cssText='flex:1;height:8px;min-width:0;padding:0;border-radius:4px';b.onclick=()=>{go(i);stop()};bar.appendChild(b)});
+let cur=-1,tm=null;
+function go(n){n=(n+L.length)%L.length;if(n===cur)return;const f=cur<0||n>cur;
+if(cur>=0){const o=scs[cur];o.classList.remove('on');o.style.transformOrigin=f?L[cur][4]:'50% 50%';o.style.transform=f?'scale(9)':'scale(.15)'}
+const e=scs[n];e.style.transition='none';e.style.transformOrigin=f?'50% 50%':L[n][4];e.style.transform=f?'scale(.15)':'scale(9)';void e.offsetWidth;e.style.transition='';e.style.transform='';
+setTimeout(()=>{e.style.transformOrigin=L[n][4]},1450);e.classList.add('on');cur=n;
+const ov=document.querySelectorAll('.ov');ov.forEach(x=>x.style.opacity=0);
+setTimeout(()=>{document.getElementById('num').textContent=String(n+1).padStart(2,'0')+' / 08';document.getElementById('ttl').textContent=L[n][0];document.getElementById('mag').textContent=L[n][1];document.getElementById('cap').textContent=L[n][3];ov.forEach(x=>x.style.opacity=1)},500);
+[...bar.children].forEach((b,k)=>b.style.background=k<=n?AC:'transparent')}
+const pb=document.getElementById('play');
+function play(){tm=setInterval(()=>go(cur+1),8000);pb.innerHTML='<i class="ti ti-player-pause"></i> Pauza'}
+function stop(){clearInterval(tm);tm=null;pb.innerHTML='<i class="ti ti-player-play"></i> Přehrát'}
+pb.onclick=()=>tm?stop():play();
+document.getElementById('prev').onclick=()=>{go(cur-1);stop()};document.getElementById('next').onclick=()=>{go(cur+1);stop()};
+document.getElementById('fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()};
+document.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){go(cur+1);stop()}else if(ev.key==='ArrowLeft'){go(cur-1);stop()}else if(ev.key===' '){ev.preventDefault();tm?stop():play()}else if(ev.key==='f'){document.getElementById('fs').click()}});
+go(0);play();
+</script>
+</body>
+</html>
